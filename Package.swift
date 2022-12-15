@@ -7,7 +7,7 @@ let package = Package(
     name: "day_fifteen",
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
-        .library(
+        .executable(
             name: "day_fifteen",
             targets: ["day_fifteen"]),
     ],
@@ -21,8 +21,8 @@ let package = Package(
         .target(
             name: "day_fifteen",
             dependencies: []),
-        .testTarget(
-            name: "day_fifteenTests",
-            dependencies: ["day_fifteen"]),
+//        .testTarget(
+//            name: "day_fifteenTests",
+//            dependencies: ["day_fifteen"]),
     ]
 )
