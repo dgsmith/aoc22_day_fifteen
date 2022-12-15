@@ -4,7 +4,7 @@ import Foundation
 var beacons = [Beacon]()
 var sensors = [Sensor]()
 
-let filePath = "/Users/grayson/code/advent_of_code/2022/day_fifteen/input.txt"
+let filePath = "/Users/graysonsmith/code/advent_of_code/2022/aoc22_day_fifteen/input.txt"
 guard let filePointer = fopen(filePath, "r") else {
     preconditionFailure("Could not open file at \(filePath)")
 }
@@ -103,23 +103,73 @@ if false {
 
 var output: (x: Int, y: Int)?
 
-for x in 0...4000000 {
-    for y in 0...4000000 {
-        let currentPosition = Position(x: x, y: y)
-        
-        let beacon = beacons.first { $0.position == currentPosition }
-        if beacon != nil {
-            continue
-        }
-        
-        let found = sensors.first { $0.position.distance(to: currentPosition) <= $0.maxDetectableDistance }
-        if found == nil {
-            output = (x: x, y: y)
-            break
+let maxX = 4000000
+let maxY = 4000000
+
+let threads = 20
+
+var outputs = [Position](repeating: Position(), count: threads)
+
+DispatchQueue.concurrentPerform(iterations: threads) { index in
+    let start = (maxX / threads) * index
+    let max = (maxX / threads) * (index + 1)
+
+//    var yCoordsToSkip = [Int](repeating: 0, count: max - start)
+    for y in start..<max {
+//        while yCoordsToSkip[y] > 0 {
+//            yCoordsToSkip[y] -= 1
+//            continue
+//        }
+
+        var xCoordsToSkip = 0
+        for x in start..<max {
+            while xCoordsToSkip > 0 {
+                xCoordsToSkip -= 1
+                continue
+            }
+            let currentPosition = Position(x: x, y: y)
+
+            var sensorDistanceRemaining = 0
+            let found = sensors.first {
+                let distance = $0.position.distance(to: currentPosition)
+                sensorDistanceRemaining = $0.maxDetectableDistance - distance
+                return distance <= $0.maxDetectableDistance
+            }
+            if found == nil {
+                outputs[index] = Position(x: x, y: y)
+                break
+            }
+
+            xCoordsToSkip = sensorDistanceRemaining
+//            yCoordsToSkip[y]
         }
     }
 }
 
-print(output!)
-print((output!.x * 4000000) + output!.y)
+//for y in 0...maxY {
+//    var xCoordsToSkip = 0
+//    for x in 0...maxY {
+//        while xCoordsToSkip > 0 {
+//            xCoordsToSkip -= 1
+//            continue
+//        }
+//        let currentPosition = Position(x: x, y: y)
+//
+//        var sensorDistanceRemaining = 0
+//        let found = sensors.first {
+//            let distance = $0.position.distance(to: currentPosition)
+//            sensorDistanceRemaining = $0.maxDetectableDistance - distance
+//            return distance <= $0.maxDetectableDistance
+//        }
+//        if found == nil {
+//            output = (x: x, y: y)
+//            break
+//        }
+//
+//        xCoordsToSkip = sensorDistanceRemaining
+//    }
+//}
+
+print(outputs)
+//print((output!.x * 4000000) + output!.y)
 
